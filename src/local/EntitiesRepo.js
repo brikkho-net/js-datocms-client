@@ -21,7 +21,10 @@ function payloadEntities(payload) {
 export default class EntitiesRepo {
   constructor(...payloads) {
     this.entities = {};
+    this.upsertEntities(...payloads);
+  }
 
+  upsertEntities(...payloads) {
     payloads.forEach((payload) => {
       payloadEntities(payload).forEach((entityPayload) => {
         const object = new JsonApiEntity(entityPayload, this);
@@ -29,6 +32,21 @@ export default class EntitiesRepo {
         this.entities[object.type][object.id] = object;
       });
     });
+  }
+
+  destroyEntities(type, ids) {
+    ids.forEach((id) => {
+      delete this.entities[type][id];
+    });
+  }
+
+  destroyItemType(id) {
+    const itemIds = Object.values(this.entitiesRepo.entities.item)
+      .filter(item => item.itemType.id === id)
+      .map(item => item.id);
+
+    this.entitiesRepo.destroyEntities('item', itemIds);
+    this.entitiesRepo.destroyEntities('item_type', [id]);
   }
 
   findEntitiesOfType(type) {
