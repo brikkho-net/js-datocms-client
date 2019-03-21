@@ -7,6 +7,7 @@ import detectSsg from './detectSsg';
 import dump from './dump';
 import requireToken from './requireToken';
 import Loader from '../local/Loader';
+import ItemsRepo from './ItemsRepo';
 
 export default async function (options) {
   const configFile = path.resolve(options['--config'] || 'dato.config.js');
@@ -39,7 +40,7 @@ export default async function (options) {
   await loader.load();
   process.stdout.write('Done');
 
-  await dump(configFile, loader.itemsRepo, quiet);
+  await dump(configFile, new ItemsRepo(loader.entitiesRepo), quiet);
 
   let watchSpinner;
 
@@ -50,7 +51,7 @@ export default async function (options) {
       },
       () => {
         watchSpinner.succeed();
-        return dump(configFile, loader.itemsRepo, quiet);
+        return dump(configFile, new ItemsRepo(loader.entitiesRepo), quiet);
       },
     );
 

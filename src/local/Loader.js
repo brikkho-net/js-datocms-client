@@ -1,6 +1,5 @@
 import Pusher from 'pusher-js/node';
 import EntitiesRepo from './EntitiesRepo';
-import ItemsRepo from './ItemsRepo';
 
 const PUSHER_API_KEY = '75e6ef0fe5d39f481626';
 
@@ -8,6 +7,7 @@ export default class Loader {
   constructor(client, previewMode = false) {
     this.client = client;
     this.previewMode = previewMode;
+    this.entitiesRepo = new EntitiesRepo();
   }
 
   load() {
@@ -19,9 +19,8 @@ export default class Loader {
       ),
       this.client.uploads.all({}, { deserializeResponse: false, allPages: true }),
     ])
-      .then(([site, allItems, allUploads]) => {
-        this.entitiesRepo = new EntitiesRepo(site, allItems, allUploads);
-        this.itemsRepo = new ItemsRepo(this.entitiesRepo);
+      .then((payloads) => {
+        this.entitiesRepo.upsertEntities(...payloads);
       });
   }
 
@@ -52,7 +51,6 @@ export default class Loader {
       watcher.bind(eventName, async (data) => {
         notifier();
         await entitiesRepoRefresher(data);
-        this.itemsRepo = new ItemsRepo(this.entitiesRepo);
         done();
       });
     };
