@@ -61,7 +61,7 @@ export default class EntitiesRepo {
       }
     });
 
-    this.destroyEntities.forEach(cb => entities.forEach(cb));
+    this.destroyListeners.forEach(cb => entities.forEach(cb));
   }
 
   destroyItemType(id) {
